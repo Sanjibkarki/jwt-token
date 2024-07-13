@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>{{request.user.email}}</h1>
+    <button onclick="Do()">sda</button>
+    <button onclick="ref()">ref</button>
+
+    <script>
+        fetch("http://127.0.0.1:8000/api/token/", {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+              username: 'admin',
+              password: 'admin'
+            })
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            console.log(localStorage.setItem('access',data['access']));
+          })
+          .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+          });
+          
+          function Do(){
+            fetch('http://127.0.0.1:8000/api/',{
+              method:'GET',
+              headers: {
+              'Content-Type': 'application/json',
+              'Authorization':`Bearer ${localStorage.getItem('access')}`
+            },
+            
+            })
+            .then((data)=>{
+                return data.json()
+            })
+            .then((data)=>{
+              console.log(data)
+            })
+          }
+function ref(){
+  var refreshToken = "{{ refresh|escapejs }}";
+  console.log(refreshToken)
+          fetch("http://127.0.0.1:8000/api/token/refresh/", {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+              refresh: refreshToken
+            })
+          })
+        .then((res)=>{
+          return res.json()
+        })
+      .then((data)=>{
+        localStorage.removeItem('access')
+        localStorage.setItem('access',data['access'])
+      })}
+
+        
+    </script>
+</body>
+</html>
